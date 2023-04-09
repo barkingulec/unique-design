@@ -1,0 +1,62 @@
+{% extends 'partials/_base.html' %}
+{% load static %}
+{% block title %}Dashboard - Odtüclass{% endblock %}
+
+{% block content %}
+
+<div>
+    <button class="back-btn" id="back-btn" onclick="btnClicked(this)"><i class="fa fa-chevron-left back-icon fa-2x"></i><span class="back-text">Back</span></button>
+    <div id="image-track" class="noSelect" data-mouse-down-at="0" data-prev-percentage="0" data-percentage="0">
+        {% if user.is_authenticated %}
+
+        {% if is_enrolled %}
+        {% for course in enrolled_courses.all %}
+
+        <img class="image hidden" src="{{course.image.url}}" draggable="false" onclick="isClicked(this)" data-name="{{ course.abbreviation }}" data-fullname="{{ course.name }}" data-id="{{course.id}}">
+        <a class="course-name" id="course-name" href="#"></a>
+
+        {% endfor %}
+        
+        {% else %}
+        <img class="image hidden" src="" draggable="false" onclick="isClicked(this)" data-name="SAMPLE-000" data-fullname="Sample" data-id="000">
+        {% endif %}
+
+        {% else %}
+        {% for course in courses %}
+
+        <img class="image hidden" src="{{course.image.url}}" draggable="false" onclick="isClicked(this)" data-name="{{ course.abbreviation }}" data-fullname="{{ course.name }}" data-id="{{course.id}}">
+        <a class="course-name" id="course-name" href="#"></a>
+
+        {% endfor %}
+        {% endif %}
+    </div>
+    <div class="pointer_1 noSelect" id="pointer_1"></div>
+    <div class="pointer_2 noSelect" id="pointer_2"></div>
+    <p id="img-name" class="noSelect"></p>
+    {% if user.is_authenticated %}
+    <a onclick="showEnroll()"><button class="enroll-btn">Enroll a course</button></a>
+    {% else %}
+    <a href="{% url 'register' %}"><button class="enroll-btn">Enroll a course</button></a>
+    {% endif %}
+    <div id="selectcoursediv" class="select-course-div">
+        <a href="#" class="close-icon" onclick="closeEnroll()"><i class="fa fa-times" aria-hidden="true"></i></a>
+        <form action="{% url 'enroll_the_course' %}" method="POST">
+            {% csrf_token %}
+            <select class="select-courses" id="courses" name="course_list" onChange="redirectUrl()">
+                <option value="" selected="selected">Add Course</option>
+                {% for department in departments %}
+                <optgroup label="{{department}}">
+                {% for course in courses %}
+                {% if user not in course.students.all and course.department == department %}
+                <option value="{{course.id}}">{{course.abbreviation}}</option>
+                {% endif  %}
+                {% endfor %}
+                </optgroup>
+                {% endfor %}
+            </select>
+            <input class="select-add-btn" type="submit" value="Enroll">
+        </form>
+    </div>
+</div>
+
+{% endblock %}
